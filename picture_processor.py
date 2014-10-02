@@ -79,6 +79,18 @@ class BusbudBanner(object):
         offset = (y - height) / 2
         return name + '-vmiddle', cls.crop_verticall(image, offset, y - offset)
     
+    @classmethod
+    def picture_data(cls, file_name, file_object):
+        """Return the image to process as well as its name and its extension."""
+        tuple_to_process = cls.load(file_name, file_object) # assigns an Image
+        picture_name = tuple_to_process[0]
+        picture_to_process = tuple_to_process[1]
+        drive,path_and_file = os.path.splitdrive(picture_name)
+        path,file = os.path.split(path_and_file)
+        file_name, extension = file.split(".")
+        return  picture_name,  picture_to_process, file_name, extension
+    
+
 
 
 class PictureThread (threading.Thread):
@@ -87,19 +99,13 @@ class PictureThread (threading.Thread):
         threading.Thread.__init__(self)
 	self.threadID = threadID
         self.file = file
-        print("Image dans constructeur : {} ".format(self.file.name))
 
 
     def run(self):
         """ A COMPLETER """
         # Get the image to process as well as its name and its extension
         picture_processor = BusbudBanner()
-        tuple_to_process = picture_processor.load(self.file.name, self.file) # assigns an Image
-        picture_name = tuple_to_process[0]
-        picture_to_process = tuple_to_process[1]
-        drive,path_and_file = os.path.splitdrive(picture_name)
-        path,file = os.path.split(path_and_file)
-        file_name, extension = file.split(".")
+        picture_name,  picture_to_process, file_name, extension = picture_processor.picture_data(self.file.name, self.file)
        
         
         # Scale, blur and crop the picture
