@@ -4,6 +4,9 @@ import os # on importe le module os qui dispose de variables
           # et de fonctions utiles pour dialoguer avec votre
           # systeme d'exploitation
 
+import picture
+import parallelism
+
 from PIL import Image, ImageFilter
 
 import threading
@@ -25,5 +28,8 @@ class PictureThread (threading.Thread):
         vertical_picture = crop_top()
         top_picture = crop_bottom()
         bottom_picture = crop_crop_vmiddle()
+        print "Exiting a Thread"
+        thread.sleep(0.2) # Attendre 200 millisecondes sans rien faire
+                          # Cela facilite l'affichage
 
-print "Exiting a Thread"
+
