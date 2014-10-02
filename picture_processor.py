@@ -4,6 +4,9 @@ import os
 
 from PIL import Image, ImageFilter
 
+import threading
+import time
+
 def images():
     image_dir = os.walk('./images').next()
     for filename in image_dir[2]:
@@ -62,9 +65,62 @@ class BusbudBanner(object):
         return name + '-vmiddle', cls.crop_verticall(image, offset, y - offset)
 
 
+class PictureThread (threading.Thread):
+    def __init__(self, threadID, thread_name, picture):
+        """ Class's constructor"""
+        threading.Thread.__init__(self)
+	self.threadID = threadID
+        self.picture = picture
+        self.thread_name = thread_name
+
+    def run(self):
+        """ A COMPLETER """
+        picture_processor = new BusbudBanner()
+        scaled_picture = picture_processor.scale(self.picture)
+        blurred_picture = picture_processor.blur(scaled_picture)
+        vertical_picture = crop_top()
+        top_picture = crop_bottom()
+        bottom_picture = crop_crop_vmiddle()
+
+
+class ParallelProcessing (threading.Thread):
+    """ A COMPLETER"""
+
+    def __init__(self):
+	"""Class's constructor"""
+        pass
+
+    def execute_threads(self, picture_iterator):
+        """A COMPLETER """
+        # Create a thread per picture
+        thread_index = 1
+        threadList = [] # Create an empty list of threads
+        for picture in picture_iterator:
+             thread = PictureThread(thread_index, "Thread" + picture_index, picture)
+             threadList.append(thread)
+             picture_index +=1
+
+	# Start all the created Threads
+        index = 0 # 
+	while index < len(threadList):
+            threadList[index].start
+            index += 1 # incrementation de l'index
+            print("The thread {} is running".format(index))
+
+
 def main():
-    raise NotImplementedError
+    """ A COMPLETER"""
+    #raise NotImplementedError
+    picture_iterator = images()  # get an iterator over the pictures to process
+    concurrency = ParallelProcessing() 
+    concurrency.execute_threads( picture_iterator) # launch  the threads allowing to concurrently process the pictures
+
+    print "Exiting Main Thread"
 
 
 if __name__ == '__main__':
     main()
+
+
+# To avoid the program to shut right after the execution (Windows)
+os.system("pause")
