@@ -32,6 +32,15 @@ class BusbudBanner(object):
         y_size = int(round(y / scale))
         return name, image.resize((x_size, y_size), resample)
 
+      @classmethod
+    def scale_y(cls, name, image, size=1500, resample=Image.BICUBIC):
+        """Added as a Bonus: Scale the image along its x-axis to `size` pixels."""
+        x, y = image.size
+        scale = float(y) / size
+        y_size = size
+        x_size = int(round(x / scale))
+        return name, image.resize((x_size, y_size), resample)
+
     @classmethod
     def blur(cls, name, image, radius=6):
         """Apply a Gaussian blur to image."""
