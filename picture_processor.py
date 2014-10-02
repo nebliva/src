@@ -36,6 +36,15 @@ class BusbudBanner(object):
         return name, image.resize((x_size, y_size), resample)
 
     @classmethod
+    def scale_y(cls, name, image, size=1500, resample=Image.BICUBIC):
+        """Added as a Bonus: allow scaling the image along its x-axis to `size` pixels."""
+        x, y = image.size
+        scale = float(y) / size
+        y_size = size
+        x_size = int(round(x / scale))
+        return name, image.resize((x_size, y_size), resample)
+
+    @classmethod
     def blur(cls, name, image, radius=6):
         """Apply a Gaussian blur to image."""
         return name + '-blur', image.filter(ImageFilter.GaussianBlur(radius))
@@ -70,17 +79,27 @@ class PictureThread (threading.Thread):
         """ Class's constructor"""
         threading.Thread.__init__(self)
 	self.threadID = threadID
-        self.picture = picture
+        #self.picture = picture # assigns a file object
+        self.picture = picture.read(16) # assigns an Image
+        self.top = "-top"
+        self.middle = "-vmiddle"
+        self.bottom = "-bottom"
+
 
     def run(self):
         """ A COMPLETER """
+        # Scale, blur and crop the picture
+        print("Processed image : {}".format(self.picture.name))
         picture_processor = BusbudBanner()
-        scaled_picture = picture_processor.scale(self.picture)
-        blurred_picture = picture_processor.blur(scaled_picture)
-        vertical_picture = crop_top()
-        top_picture = crop_bottom()
-        bottom_picture = crop_crop_vmiddle()
-
+        scaled_picture = picture_processor.scale_x(self.picture.name, self.picture)
+        blurred_picture = picture_processor.blur(scaled_picture.name, scaled_picture)
+        top_picture = crop_vertical(blurred_picture, 300, 0)
+        bottom_picture = crop_bottom(blurred_picture.name + self.bottom, blurred_picture)
+        middle_picture = crop_vmiddle(blurred_picture.name + self.middle, blurred_picture)
+        
+        print("the processed image: {}".format(middle_picture))
+        # Save the generated pictures
+        directory_path = "./processed_images"
 
 class ParallelProcessing (threading.Thread):
     """ A COMPLETER"""
@@ -102,7 +121,7 @@ class ParallelProcessing (threading.Thread):
 	# Start all the created Threads
         index = 0 # 
 	while index < len(threadList):
-            threadList[index].start
+            threadList[index].start()
             index += 1 # incrementation de l'index
             print("The thread {} is running".format(index))
 
@@ -112,7 +131,7 @@ def main():
     #raise NotImplementedError
     picture_iterator = images()  # get an iterator over the pictures to process
     concurrency = ParallelProcessing() 
-    concurrency.execute_threads( picture_iterator) # launch  the threads allowing to concurrently process the pictures
+    concurrency.execute_threads(picture_iterator) # launch  the threads allowing to concurrently process the pictures
 
     print "Exiting Main Thread"
 
