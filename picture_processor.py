@@ -66,16 +66,15 @@ class BusbudBanner(object):
 
 
 class PictureThread (threading.Thread):
-    def __init__(self, threadID, thread_name, picture):
+    def __init__(self, threadID, picture):
         """ Class's constructor"""
         threading.Thread.__init__(self)
 	self.threadID = threadID
         self.picture = picture
-        self.thread_name = thread_name
 
     def run(self):
         """ A COMPLETER """
-        picture_processor = new BusbudBanner()
+        picture_processor = BusbudBanner()
         scaled_picture = picture_processor.scale(self.picture)
         blurred_picture = picture_processor.blur(scaled_picture)
         vertical_picture = crop_top()
@@ -96,9 +95,9 @@ class ParallelProcessing (threading.Thread):
         thread_index = 1
         threadList = [] # Create an empty list of threads
         for picture in picture_iterator:
-             thread = PictureThread(thread_index, "Thread" + picture_index, picture)
+             thread = PictureThread(thread_index, picture)
              threadList.append(thread)
-             picture_index +=1
+             thread_index +=1
 
 	# Start all the created Threads
         index = 0 # 
