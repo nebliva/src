@@ -16,15 +16,21 @@ def images():
 class BusbudBanner(object):
     """Image manipulation functions for Busbud Banners."""
 
+    def __init__(self):
+	"""Class's constructor"""
+        pass
+
     @classmethod
     def load(cls, name, fp):
         """Load an image from a file pointer."""
+        print("Loaded picture: {}".format(name)) # Added instruction
         return (name, Image.open(fp))
 
     @classmethod
     def save(cls, filename, image):
         """Save an image to filename"""
         image.save(filename)
+        print("The picture has been saved at : {}".format(filename)) # Added instruction 
 
     @classmethod
     def scale_x(cls, name, image, size=1500, resample=Image.BICUBIC):
@@ -72,34 +78,48 @@ class BusbudBanner(object):
         y = image.size[1]
         offset = (y - height) / 2
         return name + '-vmiddle', cls.crop_verticall(image, offset, y - offset)
+    
 
 
 class PictureThread (threading.Thread):
-    def __init__(self, threadID, picture):
+    def __init__(self, threadID, file):
         """ Class's constructor"""
         threading.Thread.__init__(self)
 	self.threadID = threadID
-        #self.picture = picture # assigns a file object
-        self.picture = picture.read(16) # assigns an Image
-        self.top = "-top"
-        self.middle = "-vmiddle"
-        self.bottom = "-bottom"
+        self.file = file
+        print("Image dans constructeur : {} ".format(self.file.name))
 
 
     def run(self):
         """ A COMPLETER """
-        # Scale, blur and crop the picture
-        print("Processed image : {}".format(self.picture.name))
+        # Get the image to process as well as its name and its extension
         picture_processor = BusbudBanner()
-        scaled_picture = picture_processor.scale_x(self.picture.name, self.picture)
-        blurred_picture = picture_processor.blur(scaled_picture.name, scaled_picture)
-        top_picture = crop_vertical(blurred_picture, 300, 0)
-        bottom_picture = crop_bottom(blurred_picture.name + self.bottom, blurred_picture)
-        middle_picture = crop_vmiddle(blurred_picture.name + self.middle, blurred_picture)
+        tuple_to_process = picture_processor.load(self.file.name, self.file) # assigns an Image
+        picture_name = tuple_to_process[0]
+        picture_to_process = tuple_to_process[1]
+        drive,path_and_file = os.path.splitdrive(picture_name)
+        path,file = os.path.split(path_and_file)
+        file_name, extension = file.split(".")
+       
         
-        print("the processed image: {}".format(middle_picture))
+        # Scale, blur and crop the picture
+        print("Processed image : {}".format(file_name + "." + extension))
+        top_name = file_name + "-top" + "." + extension
+        middle_name = file_name + "-vmiddle"  + "." + extension
+        bottom_name = file_name + "-bottom" + "." + extension
+        scaled_name = file_name + "_scaled" + "." + extension
+        blurred_name = file_name + "_blurred" + "." + extension
+        scaled_picture = picture_processor.scale_x(scaled_name,  picture_to_process)
+        #blurred_picture = picture_processor.blur(blurred_name, scaled_picture)
+        #top_picture = picture_processor.crop_vertical(blurred_picture, 300, 0)
+        #bottom_picture = picture_processor.crop_bottom(bottom_name, blurred_picture)
+        #middle_picture = picture_processor.crop_vmiddle(middle_name, blurred_picture)
+        
+        #print("the processed image: {}".format(middle_picture))
         # Save the generated pictures
-        directory_path = "./processed_images"
+        directory_path = "./processed_images/"
+        picture_processor.save(directory_path + scaled_name,  scaled_picture[1]) # scale picture is a tuple
+        
 
 class ParallelProcessing (threading.Thread):
     """ A COMPLETER"""
