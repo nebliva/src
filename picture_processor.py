@@ -143,12 +143,19 @@ class ParallelProcessing (threading.Thread):
         """A COMPLETER """
         # Create a thread per picture and start it
         thread_index = 1
+        threadList = []
         for picture in picture_iterator:
              thread = PictureThread(thread_index, picture)
              print("The thread {} is launched to process the picture {}".format( thread_index, \
              thread.file.name) + "\n")
              thread.start()
+             threadList.append(thread)
              thread_index += 1
+        
+        for thread in threadList:
+             thread.join() # to ensure that all the threads have finished
+
+        print("End of the images processing")
 
 
 def main():
