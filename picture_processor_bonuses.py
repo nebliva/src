@@ -126,23 +126,23 @@ class BusbudBannerBonus(BusbudBanner):
         y = image.size[1]
         return image.crop((x_1, 0, x_2, y))
 
-     @classmethod
+    @classmethod
     def crop_top(cls, name, image, width=300):
         """Crop `image` to `width` pixels from the top."""
-        return name + '-top', cls.crop_vertical(image, 0, width)
+        return name + '-top', cls.crop_horizontal(image, 0, width)
 
     @classmethod
     def crop_bottom(cls, name, image, width=300):
         """Crop `image` to `width` pixels from the bottom."""
         x = image.size[0]
-        return name + '-bottom', cls.crop_vertical(image, x- width)
+        return name + '-bottom', cls.crop_horizontal(image, x - width, x)
 
     @classmethod
     def crop_vmiddle(cls, name, image, width=300):
         """Crop `image` to `width` pixels from the middle."""
-        y = image.size[1]
-        offset = (y - height) / 2
-        return name + '-vmiddle', cls.crop_vertical(image, x - offset, offset)
+        x = image.size[0]
+        offset = (x - width) / 2
+        return name + '-vmiddle', cls.crop_horizontal(image, offset, x - offset)
 
 
 class PictureThread (threading.Thread):
