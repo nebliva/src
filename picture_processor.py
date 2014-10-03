@@ -133,7 +133,8 @@ class PictureThread (threading.Thread):
         
 
 class ParallelProcessing (threading.Thread):
-    """ A COMPLETER"""
+    """ A COMPLETER
+    For more details, see http://www.quantstart.com/articles/Parallelising-Python-with-Threading-and-Multiprocessing"""
 
     def __init__(self):
 	"""Class's constructor"""
