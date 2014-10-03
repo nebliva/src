@@ -1,11 +1,10 @@
 # -*- coding: utf8 -*-
 
 import os
+import multiprocessing
 
 from PIL import Image, ImageFilter
 
-import threading
-#import time
 
 def images():
     image_dir = os.walk('./images').next()
@@ -75,6 +74,7 @@ class BusbudBanner(object):
     @classmethod
     def picture_data(cls, file_name, file_object):
         """Return the image to process as well as its name and its extension."""
+        print("data to open in that function : {}".format(file_name))
         tuple_to_process = cls.load(file_name, file_object) # assigns an Image
         file_name = tuple_to_process[0]
         picture_to_process = tuple_to_process[1]
@@ -145,27 +145,25 @@ class BusbudBannerBonus(BusbudBanner):
         return name + '-vmiddle', cls.crop_horizontal(image, offset, x - offset)
 
 
-class PictureThread (threading.Thread):
-    def __init__(self, threadID, file):
-        """ Class's constructor"""
-        threading.Thread.__init__(self)
-	self.threadID = threadID
-        self.file = file
+class ParallelProcessing ():
+    """ A COMPLETER
+    For more details, see http://www.quantstart.com/articles/Parallelising-Python-with-Threading-and-Multiprocessing"""
 
+    def __init__(self):
+	"""Class's constructor"""
+        pass
 
-    def run(self):
+    def execute_process(self, file, threadID):
         """ A COMPLETER """
         # Get the image to process as well as its name and its extension
         picture_processor = BusbudBannerBonus()
         picture_name, picture_to_process, file_name, extension = \
-        picture_processor.picture_data(self.file.name, self.file)
-       
+        picture_processor.picture_data(file.name, file)
         
         # Scale, blur and crop the picture
         top_name, middle_name, bottom_name, top_picture, middle_picture, bottom_picture = \
-        picture_processor.scale_blur_crop(self.threadID, picture_name, picture_to_process, extension)
+        picture_processor.scale_blur_crop(threadID, picture_name, picture_to_process, extension)
 
-        
         # Save the generated pictures
         directory_path = "./processed_images/"
         picture_processor.save(directory_path + top_name,  top_picture[1]) # top_picture is a tuple
@@ -173,24 +171,23 @@ class PictureThread (threading.Thread):
         picture_processor.save(directory_path + bottom_name,  bottom_picture[1]) # bottom_picture is a tuple
         
 
-class ParallelProcessing (threading.Thread):
-    """ A COMPLETER"""
-
-    def __init__(self):
-	"""Class's constructor"""
-        pass
-
     def execute_threads(self, picture_iterator):
-        """A COMPLETER """
+        """Concurrently execute processes using all the cpu cores"""
         # Create a thread per picture and start it
-        thread_index = 1
+        process_index = 1
+        processList = []
         for picture in picture_iterator:
-             thread = PictureThread(thread_index, picture)
-             print("The thread {} is launched to process the picture {}".format( thread_index, \
-             thread.file.name) + "\n")
-             thread.start()
-             thread.join() # To ensure that all of the threads have finished
-             thread_index += 1
+            process_ = multiprocessing.Process(target=self.execute_process, args=(picture, process_index))
+            process_.start() # to concurrently use all the cpu cores
+            print("The process {} is launched to process the picture {}".format(process_index, \
+            picture.name) + "\n")
+            processList.append(process_)
+            process_index += 1
+        
+       # for thread in threadList:
+           # thread.process_.join() # to ensure that all the processes have finished
+
+        print("End of the images processing using all the cpu cores")
 
 
 def main():
@@ -207,6 +204,6 @@ if __name__ == '__main__':
     main()
 
 # To avoid the program to shut right after the execution (Windows)
-os.system("pause")
+#os.system("pause")
 
 
