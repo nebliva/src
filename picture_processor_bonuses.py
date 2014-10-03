@@ -34,7 +34,9 @@ class BusbudBanner(object):
 
     @classmethod
     def scale(cls, name, image, size=1500, resample=Image.BICUBIC):
-        """Scale the image along its x-axis to `size` pixels."""
+        """Scale the image along its x-axis to `size` pixels.
+           Note that I removed the x from that function in order 
+           to redefine that function and benefit from polymorphism."""
         x, y = image.size
         scale = float(x) / size
         x_size = size
@@ -187,6 +189,7 @@ class ParallelProcessing (threading.Thread):
              print("The thread {} is launched to process the picture {}".format( thread_index, \
              thread.file.name) + "\n")
              thread.start()
+             thread.join() # To ensure that all of the threads have finished
              thread_index += 1
 
 
