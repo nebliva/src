@@ -5,7 +5,7 @@ import os
 from PIL import Image, ImageFilter
 
 import threading
-import time
+#import time
 
 def images():
     image_dir = os.walk('./images').next()
@@ -149,21 +149,14 @@ class ParallelProcessing (threading.Thread):
 
     def execute_threads(self, picture_iterator):
         """A COMPLETER """
-        # Create a thread per picture
+        # Create a thread per picture and start it
         thread_index = 1
-        threadList = [] # Create an empty list of threads
         for picture in picture_iterator:
              thread = PictureThread(thread_index, picture)
-             threadList.append(thread)
-             thread_index +=1
-
-	# Start all the created Threads
-        index = 0 # 
-	while index < len(threadList):
-            threadList[index].start()
-            index += 1 # incrementation de l'index
-            print("The thread {} is launched to process the picture {}".format(index, \
-            threadList[index-1].file.name) + "\n")
+             print("The thread {} is launched to process the picture {}".format( thread_index, \
+             thread.file.name) + "\n")
+             thread.start()
+             thread_index += 1
 
 
 def main():
@@ -171,7 +164,7 @@ def main():
     #raise NotImplementedError
     picture_iterator = images()  # get an iterator over the pictures to process
     concurrency = ParallelProcessing() 
-    concurrency.execute_threads(picture_iterator) # launch  the threads allowing to concurrently process the pictures
+    concurrency.execute_threads(picture_iterator) # launch the threads allowing to concurrently process the pictures
 
     print "Exiting Main Thread"
 
@@ -179,6 +172,7 @@ def main():
 if __name__ == '__main__':
     main()
 
+ # To avoid the program to shut right after the execution (Windows)
+        os.system("pause")
 
-# To avoid the program to shut right after the execution (Windows)
-os.system("pause")
+
