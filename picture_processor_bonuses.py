@@ -92,10 +92,8 @@ class BusbudBanner(object):
 
         print("The thread {} is scaling the picture".format(thread_index) + "\n")
         scaled_picture = cls.scale(scaled_name,  picture_to_process)
-
         print("The thread {} is blurring the picture ".format(thread_index) + "\n")
         blurred_picture = cls.blur(blurred_name, scaled_picture[1]) # scaled_picture is a tuple
-    
         print("The thread {} is cropping the picture".format(thread_index) + "\n")
         top_picture = cls.crop_top(top_name, blurred_picture[1])
         bottom_picture = cls.crop_bottom(bottom_name, blurred_picture[1])
@@ -127,13 +125,13 @@ class BusbudBannerBonus(BusbudBanner):
         return image.crop((x_1, 0, x_2, y))
 
     @classmethod
-    def crop_top(cls, name, image, width=300):
-        """Crop `image` to `width` pixels from the top."""
+    def crop_bottom(cls, name, image, width=300):
+        """Crop `image` to `width` pixels from the bottom."""
         return name + '-top', cls.crop_horizontal(image, 0, width)
 
     @classmethod
-    def crop_bottom(cls, name, image, width=300):
-        """Crop `image` to `width` pixels from the bottom."""
+    def crop_top(cls, name, image, width=300):
+        """Crop `image` to `width` pixels from the top."""
         x = image.size[0]
         return name + '-bottom', cls.crop_horizontal(image, x - width, x)
 
