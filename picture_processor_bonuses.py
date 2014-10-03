@@ -16,7 +16,7 @@ def images():
 class BusbudBanner(object):
     """Image manipulation functions for Busbud Banners."""
 
-    def __init__(self):
+    def __init__(cls):
 	"""Class's constructor"""
         pass
 
@@ -33,21 +33,12 @@ class BusbudBanner(object):
         print("The picture has been saved at : {}".format(filename) + "\n") # Added instruction 
 
     @classmethod
-    def scale_x(cls, name, image, size=1500, resample=Image.BICUBIC):
+    def scale(cls, name, image, size=1500, resample=Image.BICUBIC):
         """Scale the image along its x-axis to `size` pixels."""
         x, y = image.size
         scale = float(x) / size
         x_size = size
         y_size = int(round(y / scale))
-        return name, image.resize((x_size, y_size), resample)
-
-    @classmethod
-    def scale_y(cls, name, image, size=1500, resample=Image.BICUBIC):
-        """Added for bonus to scale the image along its y-axis to `size` pixels."""
-        x, y = image.size
-        scale = float(y) / size
-        y_size = size
-        x_size = int(round(x / scale))
         return name, image.resize((x_size, y_size), resample)
 
     @classmethod
@@ -100,7 +91,7 @@ class BusbudBanner(object):
         blurred_name =  picture_name + "_blurred" + "." + extension
 
         print("The thread {} is scaling the picture".format(thread_index) + "\n")
-        scaled_picture = cls.scale_x(scaled_name,  picture_to_process)
+        scaled_picture = cls.scale(scaled_name,  picture_to_process)
 
         print("The thread {} is blurring the picture ".format(thread_index) + "\n")
         blurred_picture = cls.blur(blurred_name, scaled_picture[1]) # scaled_picture is a tuple
@@ -110,6 +101,48 @@ class BusbudBanner(object):
         bottom_picture = cls.crop_bottom(bottom_name, blurred_picture[1])
         middle_picture = cls.crop_vmiddle(middle_name, blurred_picture[1])
         return   top_name, middle_name, bottom_name, top_picture, middle_picture, bottom_picture  
+
+
+class BusbudBannerBonus(BusbudBanner):
+    """Added for bonus to enable scaling along the 
+    y axis and cropping along the x. """
+
+    def __init__(cls):
+	"""Class's constructor"""
+        pass
+
+    @classmethod
+    def scale(cls, name, image, size=1500, resample=Image.BICUBIC):
+        """Scale the image along its y-axis to `size` pixels."""
+        x, y = image.size
+        scale = float(y) / size
+        y_size = size
+        x_size = int(round(x / scale))
+        return name, image.resize((x_size, y_size), resample)
+
+    @classmethod
+    def crop_horizontal(cls, image, x_1, x_2):
+        """Crop an image along its x-axis."""
+        y = image.size[1]
+        return image.crop((x_1, 0, x_2, y))
+
+     @classmethod
+    def crop_top(cls, name, image, width=300):
+        """Crop `image` to `width` pixels from the top."""
+        return name + '-top', cls.crop_vertical(image, 0, width)
+
+    @classmethod
+    def crop_bottom(cls, name, image, width=300):
+        """Crop `image` to `width` pixels from the bottom."""
+        x = image.size[0]
+        return name + '-bottom', cls.crop_vertical(image, x- width)
+
+    @classmethod
+    def crop_vmiddle(cls, name, image, width=300):
+        """Crop `image` to `width` pixels from the middle."""
+        y = image.size[1]
+        offset = (y - height) / 2
+        return name + '-vmiddle', cls.crop_vertical(image, x - offset, offset)
 
 
 class PictureThread (threading.Thread):
@@ -123,7 +156,7 @@ class PictureThread (threading.Thread):
     def run(self):
         """ A COMPLETER """
         # Get the image to process as well as its name and its extension
-        picture_processor = BusbudBanner()
+        picture_processor = BusbudBannerBonus()
         picture_name, picture_to_process, file_name, extension = \
         picture_processor.picture_data(self.file.name, self.file)
        
