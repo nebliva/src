@@ -43,7 +43,7 @@ class BusbudBanner(object):
 
     @classmethod
     def scale_y(cls, name, image, size=1500, resample=Image.BICUBIC):
-        """Added as a Bonus: allow scaling the image along its x-axis to `size` pixels."""
+        """Added for bonus to scale the image along its y-axis to `size` pixels."""
         x, y = image.size
         scale = float(y) / size
         y_size = size
