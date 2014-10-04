@@ -5,7 +5,7 @@ import os
 from PIL import Image, ImageFilter
 
 import threading
-#import time
+
 
 def images():
     image_dir = os.walk('./images').next()
@@ -79,8 +79,8 @@ class BusbudBanner(object):
         picture_to_process = tuple_to_process[1]
         drive,path_and_file = os.path.splitdrive(file_name)
         path,file = os.path.split(path_and_file)
-        picture_name, extension = file.split(".")
-        return  picture_name,  picture_to_process, file_name, extension
+        name, extension = file.split(".")
+        return  picture_to_process, name,  extension
     
     @classmethod
     def scale_blur_crop(cls,  thread_index, picture_name, picture_to_process):
@@ -100,7 +100,9 @@ class BusbudBanner(object):
         return   top_picture, middle_picture, bottom_picture  
 
 
-class PictureThread (threading.Thread):
+class ImageThread (threading.Thread): 
+    """Provide functions to handle a thread allowing an image processing"""
+
     def __init__(self, threadID, file):
         """ Class's constructor"""
         threading.Thread.__init__(self)
@@ -109,40 +111,42 @@ class PictureThread (threading.Thread):
 
 
     def run(self):
-        """ A COMPLETER """
         # Get the image to process as well as its name and its extension
         picture_processor = BusbudBanner()
-        picture_name, picture_to_process, file_name, extension = \
+        picture_to_process, filename, extension = \
         picture_processor.picture_data(self.file.name, self.file)
        
         
         # Scale, blur and crop the picture
         top_picture, middle_picture, bottom_picture = \
-        picture_processor.scale_blur_crop(self.threadID, picture_name, picture_to_process)
+        picture_processor.scale_blur_crop(self.threadID, filename, picture_to_process)
 
         
         # Save the generated pictures
         directory_path = "./processed_images/"
-        picture_processor.save(directory_path + top_picture[0] + "." +extension,  top_picture[1]) # top_picture is a tuple
+        picture_processor.save(directory_path + top_picture[0] + "." + extension,  \
+        top_picture[1]) # top_picture is a tuple
         picture_processor.save(directory_path +  middle_picture[0] + "." +extension,  middle_picture[1]) 
         picture_processor.save(directory_path + bottom_picture[0] + "." +extension,  bottom_picture[1])
         
 
 class ParallelProcessing (threading.Thread):
-    """ A COMPLETER
-    For more details about threading, see https://docs.python.org/2/library/threading.html#module-threading"""
+    """Provide functions to launch the threads allowing the concurrent 
+    processing of images. For more details about threading, see 
+    https://docs.python.org/2/library/threading.html#module-threading"""
 
     def __init__(self):
 	"""Class's constructor"""
         pass
 
     def execute_threads(self, picture_iterator):
-        """A COMPLETER """
+        """Launch concurrent threads to handle scaling, blurring
+        and crpping of images"""
         # Create a thread per picture and start it
         thread_index = 1
         threadList = []
         for picture in picture_iterator:
-             thread = PictureThread(thread_index, picture)
+             thread = ImageThread(thread_index, picture)
              print("The thread {} is launched to process the picture {}".format( thread_index, \
              thread.file.name) + "\n")
              thread.start()
@@ -156,7 +160,6 @@ class ParallelProcessing (threading.Thread):
 
 
 def main():
-    """ A COMPLETER"""
     #raise NotImplementedError
     picture_iterator = images()  # get an iterator over the pictures to process
     concurrency = ParallelProcessing() 
