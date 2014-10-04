@@ -82,16 +82,16 @@ class BusbudBanner(object):
         return  picture_name, file_name, extension
     
     @classmethod
-    def scale_blur_crop(cls,  thread_index, picture_name, picture_to_process):
+    def scale_blur_crop(cls,  process_index, picture_name, picture_to_process):
         """Function added to Scale, blur and crop the input image."""
         scaled_name =  picture_name + "_scaled"
         blurred_name =  picture_name + "_blurred"
 
-        print("The process {} is scaling the picture".format(thread_index) + "\n")
+        print("The process {} is scaling the picture".format(process_index) + "\n")
         scaled_picture = cls.scale(scaled_name,  picture_to_process)
-        print("The process {} is blurring the picture ".format(thread_index) + "\n")
+        print("The process {} is blurring the picture ".format(process_index) + "\n")
         blurred_picture = cls.blur(blurred_name, scaled_picture[1]) # scaled_picture is a tuple
-        print("The process {} is cropping the picture".format(thread_index) + "\n")
+        print("The process {} is cropping the picture".format(process_index) + "\n")
         top_picture = cls.crop_top(picture_name, blurred_picture[1])
         bottom_picture = cls.crop_bottom(picture_name, blurred_picture[1])
         middle_picture = cls.crop_vmiddle(picture_name, blurred_picture[1])
@@ -160,9 +160,12 @@ class PictureProcess ():
         
         # Save the generated pictures
         directory_path = "./processed_images/"
-        picture_processor.save(directory_path + top_picture[0] + "." + extension,  top_picture[1]) # top_picture is a tuple
-        picture_processor.save(directory_path + middle_picture[0] + "." + extension,  middle_picture[1]) 
-        picture_processor.save(directory_path +  bottom_picture[0] + "." + extension,  bottom_picture[1]) 
+        picture_processor.save(directory_path + top_picture[0] + "_bonus" + "." \
+        + extension,  top_picture[1]) # top_picture is a tuple
+        picture_processor.save(directory_path + middle_picture[0] + "_bonus" + \
+        "." + extension,  middle_picture[1]) 
+        picture_processor.save(directory_path +  bottom_picture[0] + "_bonus" \
+        + "." + extension,  bottom_picture[1]) 
         
 
 class ParallelProcessing ():
