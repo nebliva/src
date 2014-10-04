@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 
 import os
-import threading 
+from multiprocessing import Process
 
 from PIL import Image, ImageFilter
 
@@ -72,16 +72,16 @@ class BusbudBanner(object):
         return name + '-vmiddle', cls.crop_vertical(image, offset, y - offset)
     
     @classmethod
-    def picture_data(cls, file_name, file_object):
+    def picture_data(cls, tuple_to_process):
         """Return the image to process as well as its name and its extension."""
         
-        tuple_to_process = cls.load(file_name, file_object) # assigns an Image
+        #tuple_to_process = cls.load(file_name, file_object) # assigns an Image
         file_name = tuple_to_process[0]
         picture_to_process = tuple_to_process[1]
         drive,path_and_file = os.path.splitdrive(file_name)
         path,file = os.path.split(path_and_file)
         picture_name, extension = file.split(".")
-        return  picture_name,  picture_to_process, file_name, extension
+        return  picture_name, file_name, extension
     
     @classmethod
     def scale_blur_crop(cls,  thread_index, picture_name, picture_to_process, extension):
@@ -145,26 +145,23 @@ class BusbudBannerBonus(BusbudBanner):
         return name + '-vmiddle', cls.crop_horizontal(image, offset, x - offset)
 
 
-class PictureThread (threading.Thread):
-    def __init__(self, threadID, file):
+class PictureProcess ():
+    def __init__(self, threadID, tuple_picture):
         """ Class's constructor"""
-        threading.Thread.__init__(self)
 	self.threadID = threadID
-        self.file = file
+        self.tuple_picture = tuple_picture 
+        self.process_ = Process(target=self.run_process)
 
 
-    def run(self):
+    def run_process(self):
         """ A COMPLETER """
         # Get the image to process as well as its name and its extension
         picture_processor = BusbudBannerBonus() # picture_processor = BusbudBanner()
-        picture_name, picture_to_process, file_name, extension = \
-        picture_processor.picture_data(self.file.name, self.file)
+        picture_name, file_name, extension = picture_processor.picture_data(self.tuple_picture)
        
-        
         # Scale, blur and crop the picture
         top_name, middle_name, bottom_name, top_picture, middle_picture, bottom_picture = \
-        picture_processor.scale_blur_crop(self.threadID, picture_name, picture_to_process, extension)
-
+        picture_processor.scale_blur_crop(self.threadID, picture_name, self.tuple_picture[1], extension)
         
         # Save the generated pictures
         directory_path = "./processed_images/"
@@ -173,7 +170,7 @@ class PictureThread (threading.Thread):
         picture_processor.save(directory_path + bottom_name,  bottom_picture[1]) # bottom_picture is a tuple
         
 
-class ParallelProcessing (threading.Thread):
+class ParallelProcessing ():
     """ A COMPLETER
     For more details, see http://www.quantstart.com/articles/Parallelising-Python-with-Threading-and-Multiprocessing"""
 
@@ -186,16 +183,17 @@ class ParallelProcessing (threading.Thread):
         # Create a thread per picture and start it
         thread_index = 1
         threadList = []
-        for picture in picture_iterator:
-             thread = PictureThread(thread_index, picture)
+        banner = BusbudBannerBonus()
+        for tuple_picture in picture_iterator:
+             thread = PictureProcess(thread_index, banner.load(tuple_picture.name, tuple_picture))
              print("The thread {} is launched to process the picture {}".format( thread_index, \
-             thread.file.name) + "\n")
-             thread.start()
+             tuple_picture.name) + "\n")
+             thread.process_.start()
              threadList.append(thread)
              thread_index += 1
         
         for thread in threadList:
-             thread.join() # to ensure that all the threads have finished
+             thread.process_.join() # to ensure that all the threads have finished
 
         print("End of the images processing.")
 
@@ -214,4 +212,4 @@ if __name__ == '__main__':
     main()
 
 # To avoid the program to shut right after the execution (Windows)
-os.system("pause")
+#os.system("pause")
