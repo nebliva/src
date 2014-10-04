@@ -83,14 +83,10 @@ class BusbudBanner(object):
         return  picture_name,  picture_to_process, file_name, extension
     
     @classmethod
-    def scale_blur_crop(cls,  thread_index, picture_name, picture_to_process, extension):
+    def scale_blur_crop(cls,  thread_index, picture_name, picture_to_process):
         """Scale, blur and crop the input image."""
-        top_name = picture_name + "-top" + "." + extension
-        middle_name =  picture_name + "-vmiddle"  + "." + extension
-        bottom_name =  picture_name + "-bottom" + "." + extension
-        scaled_name =  picture_name + "_scaled" + "." + extension
-        blurred_name =  picture_name + "_blurred" + "." + extension
-
+        scaled_name =  picture_name + "_scaled"
+        blurred_name =  picture_name + "_blurred"
         print("The thread {} is scaling the picture".format(thread_index) + "\n")
         scaled_picture = cls.scale_x(scaled_name,  picture_to_process)
 
@@ -98,10 +94,10 @@ class BusbudBanner(object):
         blurred_picture = cls.blur(blurred_name, scaled_picture[1]) # scaled_picture is a tuple
     
         print("The thread {} is cropping the picture".format(thread_index) + "\n")
-        top_picture = cls.crop_top(top_name, blurred_picture[1])
-        bottom_picture = cls.crop_bottom(bottom_name, blurred_picture[1])
-        middle_picture = cls.crop_vmiddle(middle_name, blurred_picture[1])
-        return   top_name, middle_name, bottom_name, top_picture, middle_picture, bottom_picture  
+        top_picture = cls.crop_top(picture_name, blurred_picture[1])
+        bottom_picture = cls.crop_bottom(picture_name, blurred_picture[1])
+        middle_picture = cls.crop_vmiddle(picture_name, blurred_picture[1])
+        return   top_picture, middle_picture, bottom_picture  
 
 
 class PictureThread (threading.Thread):
@@ -121,20 +117,20 @@ class PictureThread (threading.Thread):
        
         
         # Scale, blur and crop the picture
-        top_name, middle_name, bottom_name, top_picture, middle_picture, bottom_picture = \
-        picture_processor.scale_blur_crop(self.threadID, picture_name, picture_to_process, extension)
+        top_picture, middle_picture, bottom_picture = \
+        picture_processor.scale_blur_crop(self.threadID, picture_name, picture_to_process)
 
         
         # Save the generated pictures
         directory_path = "./processed_images/"
-        picture_processor.save(directory_path + top_name,  top_picture[1]) # top_picture is a tuple
-        picture_processor.save(directory_path + middle_name,  middle_picture[1]) # middle_picture is a tuple
-        picture_processor.save(directory_path + bottom_name,  bottom_picture[1]) # bottom_picture is a tuple
+        picture_processor.save(directory_path + top_picture[0] + "." +extension,  top_picture[1]) # top_picture is a tuple
+        picture_processor.save(directory_path +  middle_picture[0] + "." +extension,  middle_picture[1]) 
+        picture_processor.save(directory_path + bottom_picture[0] + "." +extension,  bottom_picture[1])
         
 
 class ParallelProcessing (threading.Thread):
     """ A COMPLETER
-    For more details, see http://www.quantstart.com/articles/Parallelising-Python-with-Threading-and-Multiprocessing"""
+    For more details about threading, see https://docs.python.org/2/library/threading.html#module-threading"""
 
     def __init__(self):
 	"""Class's constructor"""
@@ -164,7 +160,8 @@ def main():
     #raise NotImplementedError
     picture_iterator = images()  # get an iterator over the pictures to process
     concurrency = ParallelProcessing() 
-    concurrency.execute_threads(picture_iterator) # launch the threads allowing to concurrently process the pictures
+    concurrency.execute_threads(picture_iterator) # launch the threads allowing the 
+                                                  # concurrent processing of the pictures
 
     print "Exiting Main Thread"
 
@@ -172,7 +169,7 @@ def main():
 if __name__ == '__main__':
     main()
 
-# To avoid the program to shut right after the execution (Windows)
+# To avoid shutting the program right after its execution (Windows)
 os.system("pause")
 
 
