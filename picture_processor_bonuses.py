@@ -73,37 +73,37 @@ class BusbudBanner(object):
     
     @classmethod
     def picture_data(cls, image_tuple):
-        """Function added to get the image's path, name and extension."""
+        """Function added to get the image's name and extension."""
         
         file_name = image_tuple[0]
         drive,path_and_file = os.path.splitdrive(file_name)
         path,file = os.path.split(path_and_file)
-        picture_name, extension = file.split(".")
-        return  picture_name, file_name, extension
+        name, extension = file.split(".")
+        return  name, extension
     
     @classmethod
-    def scale_blur_crop(cls,  process_index, picture_name, picture_to_process):
+    def scale_blur_crop(cls,  process_index, name, image):
         """Function added to Scale, blur and crop the input image."""
-        scaled_name =  picture_name + "_scaled"
-        blurred_name =  picture_name + "_blurred"
+        scaled_name =  name + "_scaled"
+        blurred_name =  name + "_blurred"
 
         print("The process {} is scaling the picture".format(process_index) + "\n")
-        scaled_picture = cls.scale(scaled_name,  picture_to_process)
+        scaled_image = cls.scale(scaled_name,  image)
         print("The process {} is blurring the picture ".format(process_index) + "\n")
-        blurred_picture = cls.blur(blurred_name, scaled_picture[1]) # scaled_picture is a tuple
+        blurred_image = cls.blur(blurred_name, scaled_image[1]) # scaled_image is a tuple
         print("The process {} is cropping the picture".format(process_index) + "\n")
-        top_picture = cls.crop_top(picture_name, blurred_picture[1])
-        bottom_picture = cls.crop_bottom(picture_name, blurred_picture[1])
-        middle_picture = cls.crop_vmiddle(picture_name, blurred_picture[1])
-        return  top_picture, middle_picture, bottom_picture  
+        top_image = cls.crop_top(name, blurred_image[1])
+        bottom_image = cls.crop_bottom(name, blurred_image[1])
+        middle_image = cls.crop_vmiddle(name, blurred_image[1])
+        return  top_image, middle_image, bottom_image  
 
 
 class BusbudBannerBonus(BusbudBanner):
-    """Added for bonus to enable scaling along the 
-    y axis and cropping along the x. """
+    """Provide support for image scaling along the y axis and cropping 
+    along the x. """
 
     def __init__(cls):
-	"""Class's constructor"""
+	"""Class's constructor."""
         pass
 
     @classmethod
@@ -140,7 +140,10 @@ class BusbudBannerBonus(BusbudBanner):
         return name + '-vmiddle', cls.crop_horizontal(image, offset, x - offset)
 
 
-class PictureProcess ():
+class ImageProcess ():
+    """ Provide functions to handle a process allowing the scaling,
+    blurring and cropping of an image"""
+
     def __init__(self, threadID, tuple_picture):
         """ Class's constructor"""
 	self.threadID = threadID
@@ -149,60 +152,62 @@ class PictureProcess ():
 
 
     def run_process(self):
-        """ A COMPLETER """
+        """ Produce 3 images from the scaling, blurring and cropping of an image
+        and save these 3 images. """
         # Get the image to process as well as its name and its extension
-        picture_processor = BusbudBannerBonus() # picture_processor = BusbudBanner()
-        picture_name, file_name, extension = picture_processor.picture_data(self.tuple_picture)
+        image_processor = BusbudBannerBonus() # picture_processor = BusbudBanner()
+        image_name, extension = image_processor.picture_data(self.tuple_picture)
        
-        # Scale, blur and crop the picture
-        top_picture, middle_picture, bottom_picture = \
-        picture_processor.scale_blur_crop(self.threadID, picture_name, self.tuple_picture[1])
+        # Scale, blur and crop the image
+        top_image, middle_image, bottom_image = \
+        image_processor.scale_blur_crop(self.threadID, image_name, self.tuple_picture[1])
         
         # Save the generated pictures
         directory_path = "./processed_images/"
-        picture_processor.save(directory_path + top_picture[0] + "_bonus" + "." \
-        + extension,  top_picture[1]) # top_picture is a tuple
-        picture_processor.save(directory_path + middle_picture[0] + "_bonus" + \
-        "." + extension,  middle_picture[1]) 
-        picture_processor.save(directory_path +  bottom_picture[0] + "_bonus" \
-        + "." + extension,  bottom_picture[1]) 
+        image_processor.save(directory_path + top_image[0] + "_bonus" + "." \
+        + extension,  top_image[1]) # top_image is a tuple
+        image_processor.save(directory_path + middle_image[0] + "_bonus" + \
+        "." + extension,  middle_image[1]) 
+        image_processor.save(directory_path +  bottom_image[0] + "_bonus" \
+        + "." + extension,  bottom_image[1]) 
         
 
 class ParallelProcessing ():
-    """ A COMPLETER
-    For more details about multiprocessing, see https://docs.python.org/2/library/multiprocessing.html"""
+    """ Provide functions to launch the processes allowing the concurrent 
+    processing of images. For more details about multiprocessing, see 
+    https://docs.python.org/2/library/multiprocessing.html"""
 
     def __init__(self):
 	"""Class's constructor"""
         pass
 
-    def execute_threads(self, picture_iterator):
-        """A COMPLETER """
-        # Create a thread per picture and start it
+    def execute_processes(self, image_iterator):
+        """Launch concurrent processes to handle the scaling, blurring
+        and cropping of images"""
+        # Create a process per image and start it
         process_index = 1
         processList = []
         banner = BusbudBannerBonus()
-        for tuple_picture in picture_iterator:
-             picture_process = PictureProcess(process_index, banner.load(tuple_picture.name, tuple_picture))
-             print("The process {} is launched to process the picture {}".format(process_index, \
-             tuple_picture.name) + "\n")
-             picture_process.process_.start()
-             processList.append(picture_process)
+        for tuple_image in image_iterator:
+             image_process = ImageProcess(process_index, banner.load(tuple_image.name, tuple_image))
+             print("The process {} is launched to process the image {}".format(process_index, \
+             tuple_image.name) + "\n")
+             image_process.process_.start()
+             processList.append(image_process)
              process_index += 1
         
-        for picture_process in processList:
-            picture_process.process_.join() # to ensure that all the processes have finished
+        for image_process in processList:
+            image_process.process_.join() # to ensure that all the processes have finished
 
         print("End of the images processing.")
 
 
 def main():
-    """ A COMPLETER"""
     #raise NotImplementedError
-    picture_iterator = images()  # get an iterator over the pictures to process
+    image_iterator = images()  # get an iterator over the images to process
     concurrency = ParallelProcessing() 
-    concurrency.execute_threads(picture_iterator) # launch the threads allowing the concurrent 
-                                                  # processing of the the pictures
+    concurrency.execute_processes(image_iterator) # launch the threads allowing the concurrent 
+                                                  # processing of the the images
 
     print "Exiting Main Thread."
 
