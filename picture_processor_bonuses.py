@@ -87,11 +87,11 @@ class BusbudBanner(object):
         scaled_name =  name + "_scaled"
         blurred_name =  name + "_blurred"
 
-        print("The process {} is scaling the picture".format(process_index) + "\n")
+        print("The process {} is scaling the image".format(process_index) + "\n")
         scaled_image = cls.scale(scaled_name,  image)
-        print("The process {} is blurring the picture ".format(process_index) + "\n")
+        print("The process {} is blurring the image ".format(process_index) + "\n")
         blurred_image = cls.blur(blurred_name, scaled_image[1]) # scaled_image is a tuple
-        print("The process {} is cropping the picture".format(process_index) + "\n")
+        print("The process {} is cropping the image".format(process_index) + "\n")
         top_image = cls.crop_top(name, blurred_image[1])
         bottom_image = cls.crop_bottom(name, blurred_image[1])
         middle_image = cls.crop_vmiddle(name, blurred_image[1])
